@@ -8,7 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    AuthModule, 
+    AuthModule,
     UserModule,
     ConfigModule.forRoot(), //to use env variables globally
     MongooseModule.forRoot(process.env.MONGODB_URL as string),
