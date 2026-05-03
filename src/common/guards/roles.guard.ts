@@ -12,7 +12,7 @@ import { Request } from 'express';
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
-  // 🔥 Role hierarchy
+  // Role hierarchy
   private roleHierarchy = {
     USER: 1,
     ADMIN: 2,
@@ -54,7 +54,7 @@ export class RolesGuard implements CanActivate {
 
     // 7. If not allowed → block
     if (!hasAccess) {
-      throw new ForbiddenException('Access denied');
+      throw new ForbiddenException('Access denied by role');
     }
 
     return true;

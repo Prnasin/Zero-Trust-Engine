@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { GatewayModule } from './gateway/gateway.module';
 import { RequestContextMiddleware } from './gateway/middleware/request-context.middleware';
 import { LoggingModule } from './logging/logging.module';
+import { PolicyModule } from './policy/policy.module';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { LoggingModule } from './logging/logging.module';
     GatewayModule,
     LoggingModule,
     ConfigModule.forRoot(), //to use env variables globally
-    MongooseModule.forRoot(process.env.MONGODB_URL as string), LoggingModule,
+    MongooseModule.forRoot(process.env.MONGODB_URL as string), LoggingModule, PolicyModule,
   ],
 
   controllers: [AppController],
