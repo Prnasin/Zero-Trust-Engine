@@ -56,4 +56,4 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       },
     });
   }
-}
+} //a global exception filter that catches all unhandled exceptions, logs them to the database, and returns a consistent error response format.

@@ -17,4 +17,4 @@ export class ResponseInterceptor implements NestInterceptor {
       })),
     );
   }
-}
+} //transforms the response to a consistent format with a success flag and the actual data.
