@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto, LoginDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RiskGuard } from 'src/common/guards/risk.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -25,9 +28,10 @@ export class AuthController {
     return await this.authService.registerUser(createAuthData);
     //when user registers we want to send token in response, so we will return token from service and send it in response
   }
-
+  @UseGuards(RiskGuard)
   @Post('login')
-  async login(@Body() loginData: LoginDto) {
+  async login(@Body() loginData: LoginDto, @Request() req: { context: { ip: string } }) {
+    loginData.ip = req.context.ip;
     return await this.authService.loginUser(loginData);
   }
 }

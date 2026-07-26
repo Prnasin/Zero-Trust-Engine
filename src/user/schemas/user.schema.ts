@@ -17,6 +17,9 @@ export class User {
 
   @Prop({ default: Role.USER, enum: Role })
   role!: Role;
+
+  @Prop({ type: String, default: null })
+  lastIp!: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

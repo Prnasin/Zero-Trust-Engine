@@ -60,4 +60,7 @@ export class UserService {
 
     return await this.userModel.findByIdAndUpdate(id, { role }, { new: true });
   }
+  async updateUserIp(id: string, ip: string) {
+    return await this.userModel.findByIdAndUpdate(id, { lastIp: ip }, { new: true });
+  }
 }

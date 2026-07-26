@@ -31,4 +31,7 @@ export class LoginDto {
   @IsString()
   // @MinLength(6)
   password!: string;
+  
+  @IsString()
+  ip?: string; // Optional field to capture IP address during login
 }

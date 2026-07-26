@@ -17,12 +17,13 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from './schemas/user.types';
 import { Action, Resource } from 'src/common/decorators/policy.decorator';
 import { PolicyGuard } from 'src/common/guards/policy.guard';
+import { RiskGuard } from 'src/common/guards/risk.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RiskGuard)
   @Get('profile')
   async getProfile(@Request() req) {
     const userId = req.user.sub;
@@ -34,10 +35,11 @@ export class UserController {
       name: user?.name,
       email: user?.email,
       role: user?.role,
+      risk: req.risk,
     };
   }
 
-  @UseGuards(AuthGuard, RolesGuard, PolicyGuard) //login wala role
+  @UseGuards(AuthGuard, RiskGuard, RolesGuard, PolicyGuard) //login wala role
   @Resource('user')
   @Action('findAll')
   @Roles(Role.ADMIN) //dmin and superadmin can access this route, because in roles guard we have defined role hierarchy, so admin has access to all the routes which require role less than or equal to admin
@@ -48,7 +50,7 @@ export class UserController {
   }
 
   // Superadmin only 
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RiskGuard, RolesGuard)
   @Roles(Role.SUPERADMIN)
   @Get('system-data')
   getSystemData() {
@@ -56,7 +58,7 @@ export class UserController {
   }
 
   //  Admin only
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RiskGuard, RolesGuard)
   @Roles(Role.ADMIN) //admin can get user by id
   @Get(':id')
   getUser(@Param('id') id: string) {
@@ -64,7 +66,7 @@ export class UserController {
   }
 
   //  Update role (superadmin only)
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RiskGuard, RolesGuard)
   @Roles(Role.SUPERADMIN) //only superadmin can update role of other users and admin, because in roles guard we have defined role hierarchy, so superadmin has access to all the routes which require role less than or equal to superadmin
   @Patch('role/update')
   updateUserRole(@Body() updateUserData: UpdateUserRoleDto) {
@@ -74,7 +76,7 @@ export class UserController {
     );
   }
 
-@UseGuards(AuthGuard, RolesGuard, PolicyGuard)
+@UseGuards(AuthGuard, RiskGuard, RolesGuard, PolicyGuard)
 @Resource('user')
 @Action('delete')
 @Roles(Role.USER) //admin and superadmin can delete user, because in roles guard we have defined role hierarchy, so admin has access to all the routes which require role less than or equal to admin

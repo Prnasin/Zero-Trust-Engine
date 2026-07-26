@@ -9,15 +9,18 @@ import { GatewayModule } from './gateway/gateway.module';
 import { RequestContextMiddleware } from './gateway/middleware/request-context.middleware';
 import { LoggingModule } from './logging/logging.module';
 import { PolicyModule } from './policy/policy.module';
+import { RiskModule } from './risk/risk.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    RedisModule,
     GatewayModule,
     LoggingModule,
     ConfigModule.forRoot(), //to use env variables globally
-    MongooseModule.forRoot(process.env.MONGODB_URL as string), LoggingModule, PolicyModule,
+    MongooseModule.forRoot(process.env.MONGODB_URL as string), LoggingModule, PolicyModule, RiskModule,
   ],
 
   controllers: [AppController],
