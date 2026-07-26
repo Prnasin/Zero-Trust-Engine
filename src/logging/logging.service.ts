@@ -1,20 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { ApiLog, ApiLogDocument } from './schemas/api-log.schema';
-import { Model } from 'mongoose';
+import { Injectable, Logger } from '@nestjs/common';
+import { ApiLog } from './schemas/api-log.schema';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class LoggingService {
-  constructor(
-    @InjectModel(ApiLog.name)
-    private readonly apiLogModel: Model<ApiLogDocument>,
-  ) {}
+  private readonly logger = new Logger(LoggingService.name);
+
+  constructor(private readonly redisService: RedisService) {}
 
   async log(data: Partial<ApiLog>) {
     try {
-      await this.apiLogModel.create(data);
+      const redis = this.redisService.getClient();
+      // Push to Redis Stream asynchronously
+      await redis.xadd('audit_logs', '*', 'payload', JSON.stringify(data));
     } catch (err) {
-      console.error('Failed to store log', err);
+      this.logger.error('Failed to push log to Redis Stream', err);
     }
   }
 }
