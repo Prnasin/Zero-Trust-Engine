@@ -7,7 +7,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { RiskModule } from 'src/risk/risk.module';
 
-
 @Module({
   imports: [
     UserModule,

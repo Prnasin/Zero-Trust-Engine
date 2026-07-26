@@ -1,8 +1,6 @@
-import { SetMetadata } from "@nestjs/common";
+import { SetMetadata } from '@nestjs/common';
 
 // policy.decorator.ts
-export const Resource = (resource: string) =>
-  SetMetadata('resource', resource);
+export const Resource = (resource: string) => SetMetadata('resource', resource);
 
-export const Action = (action: string) =>
-  SetMetadata('action', action);
+export const Action = (action: string) => SetMetadata('action', action);

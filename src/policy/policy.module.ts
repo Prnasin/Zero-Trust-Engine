@@ -6,16 +6,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Policy, PolicySchema } from './schemas/policy.schema';
 
 @Module({
-  imports: [    
-    MongooseModule.forFeature([{ name: Policy.name, schema: PolicySchema}]),
+  imports: [
+    MongooseModule.forFeature([{ name: Policy.name, schema: PolicySchema }]),
   ],
   controllers: [PolicyController],
-  providers: [
-    PolicyService, 
-    PolicyEngineService
-  ],
+  providers: [PolicyService, PolicyEngineService],
   exports: [
-    PolicyEngineService   // ✅ so other modules can use it
-  ]
+    PolicyEngineService, // ✅ so other modules can use it
+  ],
 })
 export class PolicyModule {}

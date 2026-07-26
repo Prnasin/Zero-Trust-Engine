@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { CreateAuthDto, LoginDto } from './dto/create-auth.dto';
 import bcrypt from 'bcrypt';
@@ -13,7 +17,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly riskTracker: RiskTrackerService,
-    
+
     private readonly riskService: RiskService,
   ) {}
   /*
@@ -24,8 +28,6 @@ export class AuthService {
     5. send token in response
     */
   async registerUser(createAuthData: CreateAuthDto) {
-    console.log('registerDto', createAuthData);
-
     const saltRounds = 10; //number of rounds to generate salt, higher the rounds more secure but slower
     const hash = await bcrypt.hash(createAuthData.password, saltRounds);
     const user = await this.userService.createUser({
@@ -44,28 +46,22 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
     // blocked for 1 hour
-const blockedTTL =
-  await this.riskTracker.getBlockTTL(
-    loginData.email,
-  );
+    const blockedTTL = await this.riskTracker.getBlockTTL(loginData.email);
 
-if (blockedTTL > 0) {
-  throw new ForbiddenException(
-    `Account blocked. Try again after ${blockedTTL} seconds`,
-  );
-}
+    if (blockedTTL > 0) {
+      throw new ForbiddenException(
+        `Account blocked. Try again after ${blockedTTL} seconds`,
+      );
+    }
 
-// temporary lock
-const lockTTL =
-  await this.riskTracker.getLockTTL(
-    loginData.email,
-  );
+    // temporary lock
+    const lockTTL = await this.riskTracker.getLockTTL(loginData.email);
 
-if (lockTTL > 0) {
-  throw new ForbiddenException(
-    `Too many attempts. Try again after ${lockTTL} seconds`,
-  );
-}
+    if (lockTTL > 0) {
+      throw new ForbiddenException(
+        `Too many attempts. Try again after ${lockTTL} seconds`,
+      );
+    }
 
     // const requestCount = await this.riskTracker.incrementRequestCount(String(user._id));
     // const failedAttempts = await this.riskTracker.getFailedAttempts(loginData.email);
@@ -86,9 +82,9 @@ if (lockTTL > 0) {
 
     const isMatch = await bcrypt.compare(loginData.password, user.password);
     if (!isMatch) {
-      const attempts = await this.riskTracker.incrementFailedAttempts(loginData.email);
-
-      console.log('ATTEMPTS:', attempts);
+      const attempts = await this.riskTracker.incrementFailedAttempts(
+        loginData.email,
+      );
 
       if (attempts >= 5) {
         await this.riskTracker.lockUser(loginData.email);
@@ -100,22 +96,29 @@ if (lockTTL > 0) {
           throw new ForbiddenException('Account blocked for 1 hour');
         }
 
-        throw new ForbiddenException('Too many failed attempts. Wait 30 seconds');
+        throw new ForbiddenException(
+          'Too many failed attempts. Wait 30 seconds',
+        );
       }
 
-      throw new UnauthorizedException(`Invalid credentials. Attempts left: ${5 - attempts}`);
+      throw new UnauthorizedException(
+        `Invalid credentials. Attempts left: ${5 - attempts}`,
+      );
     }
-await this.riskTracker.clearLoginRisk(
-  loginData.email,
-);
+    await this.riskTracker.clearLoginRisk(loginData.email);
     // await this.riskTracker.resetFailedAttempts(loginData.email);
-    const payload = { sub: user._id, role: user.role, email: user.email, jti: randomUUID() };
-    if(loginData.ip) {
+    const payload = {
+      sub: user._id,
+      role: user.role,
+      email: user.email,
+      jti: randomUUID(),
+    };
+    if (loginData.ip) {
       await this.userService.updateUserIp(String(user._id), loginData.ip);
     }
-    
+
     const token = await this.jwtService.signAsync(payload);
-    
+
     return { access_token: token };
   }
 }

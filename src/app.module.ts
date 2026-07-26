@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer} from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -20,7 +20,10 @@ import { RedisModule } from './redis/redis.module';
     GatewayModule,
     LoggingModule,
     ConfigModule.forRoot(), //to use env variables globally
-    MongooseModule.forRoot(process.env.MONGODB_URL as string), LoggingModule, PolicyModule, RiskModule,
+    MongooseModule.forRoot(process.env.MONGODB_URL as string),
+    LoggingModule,
+    PolicyModule,
+    RiskModule,
   ],
 
   controllers: [AppController],
@@ -31,7 +34,3 @@ export class AppModule implements NestModule {
     consumer.apply(RequestContextMiddleware).forRoutes('*');
   }
 }
-
-
-
-

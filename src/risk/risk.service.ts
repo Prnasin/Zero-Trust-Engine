@@ -6,37 +6,35 @@ import { RiskTrackerService } from './risk-tracker.service';
 
 @Injectable()
 export class RiskService {
-  constructor(private readonly redisService: RedisService, private readonly riskTracker: RiskTrackerService) {}
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly riskTracker: RiskTrackerService,
+  ) {}
 
   calculateRiskScore(input: RiskInput) {
-  let score = 0;
+    let score = 0;
 
-  // 1. IP Change
-  if (
-    input.previousIp &&
-    input.ip !== input.previousIp
-  ) {
-    score += RISK_WEIGHTS.IP_CHANGE;
+    // 1. IP Change
+    if (input.previousIp && input.ip !== input.previousIp) {
+      score += RISK_WEIGHTS.IP_CHANGE;
+    }
+
+    // 2. Request Rate
+    if (input.requestCount > 5) {
+      score += RISK_WEIGHTS.HIGH_REQUEST_RATE;
+    }
+
+    // 3. Geo Anomaly
+    if (
+      input.geoLocation &&
+      input.previousGeo &&
+      input.geoLocation !== input.previousGeo
+    ) {
+      score += RISK_WEIGHTS.GEO_ANOMALY;
+    }
+
+    return score;
   }
-
-  // 2. Request Rate
-  if (input.requestCount > 5) {
-    score += RISK_WEIGHTS.HIGH_REQUEST_RATE;
-  }
-
-  // 3. Geo Anomaly
-  if (
-    input.geoLocation &&
-    input.previousGeo &&
-    input.geoLocation !== input.previousGeo
-  ) {
-    score += RISK_WEIGHTS.GEO_ANOMALY;
-  }
-
-  console.log(score, 'score');
-
-  return score;
-}
 
   getRiskLevel(score: number): RiskLevel {
     if (score < RISK_THRESHOLDS.LOW) return RiskLevel.LOW;

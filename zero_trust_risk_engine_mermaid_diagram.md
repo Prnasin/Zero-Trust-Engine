@@ -17,13 +17,13 @@ graph TD
     L["User Request Data"] -->|Contains| M["userId<br/>currentIp<br/>requestCount<br/>failedAttempts"]
     M -->|Passed to| K
     
-    K -->|Calculates score| N["Risk Calculation<br/>IP Change: 30 pts<br/>High Rate: 25 pts<br/>Failed Attempts: 40 pts<br/>Geo Anomaly: 35 pts"]
+    K -->|Calculates score| N["Risk Calculation<br/>IP Change: 30 pts<br/>High Rate: 25 pts<br/>Geo Anomaly: 35 pts"]
     
     N -->|Determines level| O["Risk Levels<br/>LOW: <30<br/>MEDIUM: 30-70<br/>HIGH: >70"]
     
     O -->|Returns action| P["Decision<br/>ALLOW<br/>LOG<br/>BLOCK"]
     
-    P -->|BLOCK| Q["Throw ForbiddenException"]
+    P -->|BLOCK| Q["Blacklist JWT & Throw ForbiddenException"]
     P -->|LOG| R["Console Warning"]
     P -->|ALLOW| S["Continue to Handler"]
     

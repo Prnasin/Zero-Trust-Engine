@@ -30,7 +30,10 @@ export class AuthController {
   }
   @UseGuards(RiskGuard)
   @Post('login')
-  async login(@Body() loginData: LoginDto, @Request() req: { context: { ip: string } }) {
+  async login(
+    @Body() loginData: LoginDto,
+    @Request() req: { context: { ip: string } },
+  ) {
     loginData.ip = req.context.ip;
     return await this.authService.loginUser(loginData);
   }

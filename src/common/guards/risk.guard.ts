@@ -20,19 +20,15 @@ export class RiskGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.sub;
-    const email = request.user?.email || request.body?.email || '' ;
+    const email = request.user?.email || request.body?.email || '';
     const ip = request.context?.ip || '';
     const resolvedUserId = userId ? String(userId) : '';
-    const route =
-      request.route?.path || request.url;
-console.log("resolvedUserId:", resolvedUserId);
-console.log("email:", email);
+    const route = request.route?.path || request.url;
 
-    const blockedTTL =
-      await this.riskTracker.getRequestBlockTTL(
-        resolvedUserId || email,
-        route,
-      );
+    const blockedTTL = await this.riskTracker.getRequestBlockTTL(
+      resolvedUserId || email,
+      route,
+    );
 
     if (blockedTTL > 0) {
       throw new ForbiddenException(
@@ -40,47 +36,26 @@ console.log("email:", email);
       );
     }
 
+    const [user, requestCount] = await Promise.all([
+      resolvedUserId
+        ? this.userService.getUserById(resolvedUserId)
+        : Promise.resolve(null),
 
-   const [user, requestCount] = await Promise.all([
-  resolvedUserId
-    ? this.userService.getUserById(
-        resolvedUserId,
-      )
-    : Promise.resolve(null),
+      this.riskTracker.incrementRequestCount(resolvedUserId || email, route),
+    ]);
 
-  this.riskTracker.incrementRequestCount(
-    resolvedUserId || email,
-    route,
-  ),
-]);
+    const limit = ROUTE_RATE_LIMITS[route] || 20;
 
-    console.log("RiskGuard Data:", {
-   requestCount,
-   
-   userId: resolvedUserId,
-});
-
-const limit =
-  ROUTE_RATE_LIMITS[route] || 20;
-
-if (requestCount > limit) {
-
-  const blockDuration =
-    await this.riskTracker
-      .applyRateLimitPenalty(
+    if (requestCount > limit) {
+      const blockDuration = await this.riskTracker.applyRateLimitPenalty(
         resolvedUserId || email,
         route,
       );
 
-  throw new ForbiddenException(
-    `Rate limit exceeded. Blocked for ${blockDuration} seconds`,
-  );
-}
-
-    console.log('RiskGuard Data:', {
-      requestCount,
-      userId: resolvedUserId,
-    });
+      throw new ForbiddenException(
+        `Rate limit exceeded. Blocked for ${blockDuration} seconds`,
+      );
+    }
 
     const riskResult = this.riskService.evaluateRisk({
       userId: resolvedUserId,
@@ -88,7 +63,6 @@ if (requestCount > limit) {
       previousIp: user?.lastIp || undefined,
       requestCount,
     });
-    console.log(riskResult);
 
     request.risk = riskResult;
     if (resolvedUserId) {
@@ -104,7 +78,7 @@ if (requestCount > limit) {
       throw new ForbiddenException('High risk request blocked');
     }
     if (riskResult.level === 'MEDIUM') {
-        console.warn('⚠️ Medium Risk Activity:', riskResult);
+      console.warn('⚠️ Medium Risk Activity:', riskResult);
     }
 
     return true;

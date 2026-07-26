@@ -27,7 +27,9 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token);
 
       if (payload.jti) {
-        const isBlacklisted = await this.riskTracker.isTokenBlacklisted(payload.jti);
+        const isBlacklisted = await this.riskTracker.isTokenBlacklisted(
+          payload.jti,
+        );
         if (isBlacklisted) {
           throw new UnauthorizedException('Token is revoked due to high risk');
         }

@@ -43,13 +43,13 @@ export class UserController {
   @Resource('user')
   @Action('findAll')
   @Roles(Role.ADMIN) //dmin and superadmin can access this route, because in roles guard we have defined role hierarchy, so admin has access to all the routes which require role less than or equal to admin
-   //as a user trying to access admin ki api, it will give forbidden error, but if we login as admin and try to access admin ki api, it will give us the data, because in roles guard we have defined role hierarchy, so admin has access to all the routes which require role less than or equal to admin
+  //as a user trying to access admin ki api, it will give forbidden error, but if we login as admin and try to access admin ki api, it will give us the data, because in roles guard we have defined role hierarchy, so admin has access to all the routes which require role less than or equal to admin
   @Get()
   getAllUsers() {
     return this.userService.getAllUsers();
   }
 
-  // Superadmin only 
+  // Superadmin only
   @UseGuards(AuthGuard, RiskGuard, RolesGuard)
   @Roles(Role.SUPERADMIN)
   @Get('system-data')
@@ -76,12 +76,12 @@ export class UserController {
     );
   }
 
-@UseGuards(AuthGuard, RiskGuard, RolesGuard, PolicyGuard)
-@Resource('user')
-@Action('delete')
-@Roles(Role.USER) //admin and superadmin can delete user, because in roles guard we have defined role hierarchy, so admin has access to all the routes which require role less than or equal to admin
-@Delete(':id')
-deleteUser() {
-  return "User deleted";
-}
+  @UseGuards(AuthGuard, RiskGuard, RolesGuard, PolicyGuard)
+  @Resource('user')
+  @Action('delete')
+  @Roles(Role.USER) //admin and superadmin can delete user, because in roles guard we have defined role hierarchy, so admin has access to all the routes which require role less than or equal to admin
+  @Delete(':id')
+  deleteUser() {
+    return 'User deleted';
+  }
 }

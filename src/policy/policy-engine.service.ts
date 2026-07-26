@@ -1,33 +1,33 @@
-import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Policy } from "./schemas/policy.schema";
-import { Model } from "mongoose";
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Policy } from './schemas/policy.schema';
+import { Model } from 'mongoose';
 
 //returns true if access is allowed, false otherwise
 
 @Injectable()
 export class PolicyEngineService {
-  constructor(
-    @InjectModel(Policy.name) private policyModel: Model<Policy>
-  ) {}
+  constructor(@InjectModel(Policy.name) private policyModel: Model<Policy>) {}
 
-  async evaluate(input: { // input for policy evaluation
+  async evaluate(input: {
+    // input for policy evaluation
     role: string;
     resource: string;
     action: string;
     context: any;
   }): Promise<boolean> {
-
-    const policies = await this.policyModel.find({ //if exist in db same data
+    const policies = await this.policyModel.find({
+      //if exist in db same data
       role: input.role,
       resource: input.resource,
       action: input.action,
     });
 
     for (const policy of policies) {
-      const conditionPass = this.evaluateCondition( // evaluate any conditions
+      const conditionPass = this.evaluateCondition(
+        // evaluate any conditions
         policy.condition, // JSON string with conditions like IP, time, etc.
-        input.context // context from request, e.g. IP, time, etc.
+        input.context, // context from request, e.g. IP, time, etc.
       );
 
       if (conditionPass) {
@@ -38,7 +38,7 @@ export class PolicyEngineService {
     return false; // default deny
   }
 
-    evaluateCondition(condition: string | undefined, context: any): boolean {
+  evaluateCondition(condition: string | undefined, context: any): boolean {
     if (!condition) return true;
 
     const parsed = JSON.parse(condition);
